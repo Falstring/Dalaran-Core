@@ -1,0 +1,1 @@
+UPDATE creature_model_info SET combatreach=20 WHERE displayid=26536;

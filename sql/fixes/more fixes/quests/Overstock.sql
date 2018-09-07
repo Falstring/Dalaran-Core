@@ -1,0 +1,14 @@
+UPDATE creature_template SET flags_extra=flags_extra|64 WHERE entry IN(29618, 29619);
+UPDATE creature_template SET unit_flags=unit_flags|4, AIName='SmartAI' WHERE entry=29475;
+DELETE FROM smart_scripts WHERE entryorguid=29475 AND source_type=0;
+INSERT INTO smart_scripts VALUES (29475, 0, 0, 0, 25, 0, 100, 0, 0, 0, 0, 0, 89, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'On Reset - Move Idle');
+INSERT INTO smart_scripts VALUES (29475, 0, 1, 2, 60, 0, 100, 0, 0, 0, 1000, 1000, 11, 54537, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'On Update - Cast Spell Detonation');
+INSERT INTO smart_scripts VALUES (29475, 0, 2, 0, 61, 0, 100, 0, 0, 0, 0, 0, 41, 500, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'On Update - Despawn');
+INSERT INTO smart_scripts VALUES (29475, 0, 3, 0, 5, 0, 100, 0, 0, 0, 0, 29618, 33, 29618, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'On Kill - Kill Credit');
+INSERT INTO smart_scripts VALUES (29475, 0, 4, 0, 5, 0, 100, 0, 0, 0, 0, 29619, 33, 29618, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'On Kill - Kill Credit');
+DELETE FROM conditions WHERE SourceTypeOrReferenceId=22 AND sourceEntry=29475;
+INSERT INTO conditions VALUES(22, 2, 29475, 0, 0, 29, 1, 29618, 3, 0, 0, 0, 0, "", "Run Action if NPC Near");
+INSERT INTO conditions VALUES(22, 2, 29475, 0, 1, 29, 1, 29619, 3, 0, 0, 0, 0, "", "Run Action if NPC Near");
+DELETE FROM conditions WHERE SourceTypeOrReferenceId=13 AND SourceEntry=54537;
+INSERT INTO conditions VALUES (13, 1, 54537, 0, 0, 31, 0, 3, 29619, 0, 0, 0, 0, '', 'Target Garm Invader');
+INSERT INTO conditions VALUES (13, 1, 54537, 0, 1, 31, 0, 3, 29618, 0, 0, 0, 0, '', 'Target Snowblind Follower');

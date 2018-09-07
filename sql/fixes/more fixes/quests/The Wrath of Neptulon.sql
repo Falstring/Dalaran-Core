@@ -1,0 +1,1 @@
+UPDATE event_scripts SET x=3494.18, y=-6659.62, z=-2.55, o=1.12 WHERE id=9542;

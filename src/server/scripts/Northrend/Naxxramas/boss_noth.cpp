@@ -1,0 +1,304 @@
+/*
+ * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+#include "naxxramas.h"
+
+enum Noth
+{
+    SAY_AGGRO                       = 0,
+    SAY_SUMMON                      = 1,
+    SAY_SLAY                        = 2,
+    SAY_DEATH                       = 3,
+
+    SOUND_DEATH                     = 8848,
+
+    SPELL_CURSE_PLAGUEBRINGER       = 29213, // 25-man: 54835
+	H_SPELL_CURSE_PLAGUEBRINGER		= 54835,
+
+    //SPELL_CRIPPLE                   = 29212, // 25-man: 54814
+	SPELL_CRIPPLE					= 54814,
+
+    SPELL_TELEPORT                  = 29216,
+
+	SPELL_BERSERK					= 47008,
+
+	SPELL_ADD_BLINK					= 29210,
+	SPELL_ADD_ARCANE_EXPLOSION		= 54890,
+	H_SPELL_ADD_ARCANE_EXPLOSION	= 54891,
+
+    NPC_WARRIOR                     = 16984,
+    NPC_CHAMPION                    = 16983,
+    NPC_GUARDIAN                    = 16981
+};
+
+#define SPELL_BLINK                 RAND(29208, 29209, 29210, 29211)
+
+// Teleport position of Noth on his balcony
+Position const Teleport = { 2631.370f, -3529.680f, 274.040f, 6.277f };
+
+#define MAX_SUMMON_POS 5
+
+Position const SummonPos[MAX_SUMMON_POS] =
+{
+    { 2728.12f, -3544.43f, 261.91f, 6.04f },
+    { 2729.05f, -3544.47f, 261.91f, 5.58f },
+    { 2728.24f, -3465.08f, 264.20f, 3.56f },
+    { 2704.11f, -3456.81f, 265.53f, 4.51f },
+    { 2663.56f, -3464.43f, 262.66f, 5.20f }
+};
+
+enum Events
+{
+    EVENT_NONE,
+    EVENT_BERSERK,
+    EVENT_CURSE,
+    EVENT_BLINK,
+    EVENT_WARRIOR,
+    EVENT_BALCONY,
+    EVENT_WAVE,
+    EVENT_GROUND,
+	EVENT_NOTH_BERSERK,
+
+	EVENT_ADD_BLINK,
+	EVENT_ADD_ARCANE_EXPLOSION
+};
+
+class boss_noth : public CreatureScript
+{
+public:
+    boss_noth() : CreatureScript("boss_noth") { }
+
+    struct boss_nothAI : public BossAI
+    {
+        boss_nothAI(Creature* creature) : BossAI(creature, BOSS_NOTH) { }
+
+        void Reset() override
+        {
+            me->SetReactState(REACT_AGGRESSIVE);
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            _Reset();
+        }
+
+        void EnterCombat(Unit* /*who*/) override
+        {
+            _EnterCombat();
+            Talk(SAY_AGGRO);
+            balconyCount = 0;
+			events.ScheduleEvent(EVENT_NOTH_BERSERK, 540000);
+            EnterPhaseGround();
+        }
+
+        void EnterPhaseGround()
+        {
+            me->SetReactState(REACT_AGGRESSIVE);
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            DoZoneInCombat();
+
+            if (me->getThreatManager().isThreatListEmpty())
+                EnterEvadeMode();
+            else
+            {
+                events.ScheduleEvent(EVENT_BALCONY, 110000);
+                events.ScheduleEvent(EVENT_CURSE, urand(40000, 48000));
+                events.ScheduleEvent(EVENT_WARRIOR, 30000);
+                if (GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL)
+                    events.ScheduleEvent(EVENT_BLINK, urand(20000, 25000));
+            }
+        }
+
+        void KilledUnit(Unit* /*victim*/) override
+        {
+            if (!(rand()%5))
+                Talk(SAY_SLAY);
+        }
+
+        void JustSummoned(Creature* summon) override
+        {
+            summons.Summon(summon);
+            summon->setActive(true);
+            summon->AI()->DoZoneInCombat();
+        }
+
+        void JustDied(Unit* /*killer*/) override
+        {
+            _JustDied();
+            Talk(SAY_DEATH);
+        }
+
+        void SummonUndead(uint32 entry, uint32 num)
+        {
+            for (uint32 i = 0; i < num; ++i)
+                me->SummonCreature(entry, SummonPos[rand()%MAX_SUMMON_POS], TEMPSUMMON_CORPSE_DESPAWN, 60000);
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            if (!UpdateVictim() || !CheckInRoom())
+                return;
+
+            events.Update(diff);
+
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_CURSE:
+                        DoCastAOE(RAID_MODE(SPELL_CURSE_PLAGUEBRINGER, H_SPELL_CURSE_PLAGUEBRINGER));
+                        events.ScheduleEvent(EVENT_CURSE, urand(40000, 48000));
+                        return;
+                    case EVENT_WARRIOR:
+                        Talk(SAY_SUMMON);
+                        SummonUndead(NPC_WARRIOR, RAID_MODE(2, 3));
+                        events.ScheduleEvent(EVENT_WARRIOR, 30000);
+                        return;
+                    case EVENT_BLINK:
+                        DoCastAOE(SPELL_CRIPPLE, true);
+                        DoCastAOE(SPELL_BLINK);
+                        DoResetThreat();
+                        events.ScheduleEvent(EVENT_BLINK, 23000);
+                        return;
+                    case EVENT_BALCONY:
+                        me->SetReactState(REACT_PASSIVE);
+                        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                        me->AttackStop();
+                        me->RemoveAllAuras();
+                        me->NearTeleportTo(Teleport.GetPositionX(), Teleport.GetPositionY(), Teleport.GetPositionZ(), Teleport.GetOrientation());
+                        events.Reset();
+                        events.ScheduleEvent(EVENT_WAVE, urand(2000, 5000));
+                        waveCount = 0;
+                        return;
+                    case EVENT_WAVE:
+                        Talk(SAY_SUMMON);
+                        switch (balconyCount)
+                        {
+                            case 0:
+                                SummonUndead(NPC_CHAMPION, RAID_MODE(2, 4));
+                                break;
+                            case 1:
+								SummonUndead(NPC_GUARDIAN, RAID_MODE(1, 2));
+                                SummonUndead(NPC_CHAMPION, RAID_MODE(1, 2));                                
+                                break;
+                            case 2:
+								SummonUndead(NPC_GUARDIAN, RAID_MODE(2, 4));                                						
+                                break;
+                            default:
+                                SummonUndead(NPC_CHAMPION, RAID_MODE(5, 10));
+                                SummonUndead(NPC_GUARDIAN, RAID_MODE(5, 10));
+                                break;
+                        }
+                        ++waveCount;
+                        events.ScheduleEvent(waveCount < 2 ? EVENT_WAVE : EVENT_GROUND, urand(30000, 45000));
+                        return;
+                    case EVENT_GROUND:
+                    {
+                        ++balconyCount;
+                        float x, y, z, o;
+                        me->GetHomePosition(x, y, z, o);
+                        me->NearTeleportTo(x, y, z, o);
+                        events.ScheduleEvent(EVENT_BALCONY, 110000);
+                        EnterPhaseGround();
+                        return;
+                    }
+					case EVENT_NOTH_BERSERK:
+						DoCast(SPELL_BERSERK);
+						break;
+					default:
+						break;
+                }
+            }
+
+            if (me->HasReactState(REACT_AGGRESSIVE))
+                DoMeleeAttackIfReady();
+        }
+
+        private:
+            uint32 waveCount;
+            uint32 balconyCount;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return GetInstanceAI<boss_nothAI>(creature);
+    }
+};
+
+class npc_plagued_guardian : public CreatureScript
+{
+    public:
+        npc_plagued_guardian() : CreatureScript("npc_plagued_guardian") { }
+
+        struct npc_plagued_guardianAI : public ScriptedAI
+        {
+            npc_plagued_guardianAI(Creature* creature) : ScriptedAI(creature),
+                _instance(creature->GetInstanceScript())
+            {
+            }
+
+            void EnterCombat(Unit* /*who*/) override
+            {                                
+                events.ScheduleEvent(EVENT_ADD_BLINK, 1000);
+				events.ScheduleEvent(EVENT_ADD_ARCANE_EXPLOSION, 4000);
+            }
+
+			void UpdateAI(uint32 diff) override
+			{
+				if (!UpdateVictim())
+					return;
+
+				events.Update(diff);
+
+                while (uint32 eventId = events.ExecuteEvent())
+                {
+                    switch (eventId)
+                    {
+					case EVENT_ADD_BLINK:
+							DoCast(SPELL_BLINK);							
+							events.ScheduleEvent(EVENT_ADD_BLINK, 8000);
+						break;
+					case EVENT_ADD_ARCANE_EXPLOSION:
+							DoCast(RAID_MODE(SPELL_ADD_ARCANE_EXPLOSION, H_SPELL_ADD_ARCANE_EXPLOSION));
+							events.ScheduleEvent(EVENT_ADD_ARCANE_EXPLOSION, 6000);
+						break;
+					default:
+						break;
+					}
+				}
+				DoMeleeAttackIfReady();
+			}
+
+        private:
+            InstanceScript* const _instance;
+			EventMap events;
+        };
+
+        CreatureAI* GetAI(Creature* creature) const override
+        {
+            return GetInstanceAI<npc_plagued_guardianAI>(creature);
+        }
+};
+
+
+void AddSC_boss_noth()
+{
+    new boss_noth();
+	new npc_plagued_guardian();
+}

@@ -1,0 +1,1 @@
+UPDATE creature_template SET flags_extra=2097409 WHERE entry=25038;

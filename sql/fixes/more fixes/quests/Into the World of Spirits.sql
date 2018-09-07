@@ -1,0 +1,1 @@
+UPDATE gameobject SET position_x=836.27, position_y=-5127.56, position_z=-90.23, orientation=-1.64061 WHERE id=186662;

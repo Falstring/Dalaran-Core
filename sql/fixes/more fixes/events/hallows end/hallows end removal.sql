@@ -1,0 +1,4 @@
+DELETE FROM creature WHERE id=23537;
+DELETE FROM creature WHERE id=255001;
+DELETE FROM gameobject WHERE id=186720;
+DELETE FROM gameobject WHERE id=186234;

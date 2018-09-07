@@ -1,0 +1,1 @@
+UPDATE smart_scripts SET action_param2=2 WHERE entryorguid=28401 AND action_type=11 AND action_param1=52187;

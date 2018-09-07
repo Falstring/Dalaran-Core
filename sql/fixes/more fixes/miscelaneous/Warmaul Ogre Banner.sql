@@ -1,0 +1,1 @@
+INSERT INTO `conditions` VALUES (17, 0, 32307, 0, 0, 4, 0, 3518, 0, 0, 0, 0, 0, '', 'Warmaul Ogre banner only usable in Nagrand');

@@ -1,0 +1,50 @@
+-- Warlock Pet Stats
+
+-- Felhunter
+UPDATE pet_levelstats
+SET hp=4788, mana=1559, armor=7782, str=314, agi=90, sta=328, inte=150, spi=209
+WHERE level=80 and creature_entry=417;
+-- felguard
+UPDATE pet_levelstats
+SET hp=1627,mana=3331, armor=14033, str=314, agi=90, sta=328, inte=150, spi=209
+WHERE level=80 and creature_entry=17252;
+-- succubus
+UPDATE pet_levelstats
+SET hp=1468,mana=1559, str=314,agi=90,sta=328,inte=150,spi=209
+WHERE level=80 and creature_entry=1863;
+
+-- Felguard
+REPLACE INTO `pet_levelstats` VALUES (17252, 71, 5471, 4277, 8267, 155, 109, 359, 204, 124);
+REPLACE INTO `pet_levelstats` VALUES (17252, 72, 5623, 4384, 8607, 158, 111, 367, 211, 125);
+REPLACE INTO `pet_levelstats` VALUES (17252, 73, 5776, 4492, 8952, 161, 113, 375, 219, 128);
+REPLACE INTO `pet_levelstats` VALUES (17252, 74, 5930, 4600, 9297, 164, 115, 382, 227, 130);
+REPLACE INTO `pet_levelstats` VALUES (17252, 75, 6085, 4709, 9647, 166, 118, 390, 235, 132);
+REPLACE INTO `pet_levelstats` VALUES (17252, 76, 6241, 4818, 9997, 170, 121, 399, 242, 135);
+REPLACE INTO `pet_levelstats` VALUES (17252, 77, 6398, 4927, 10352, 172, 124, 407, 250, 138);
+REPLACE INTO `pet_levelstats` VALUES (17252, 78, 6556, 5036, 10712, 174, 125, 414, 257, 141);
+REPLACE INTO `pet_levelstats` VALUES (17252, 79, 6711, 5144, 11067, 176, 127, 423, 266, 145);
+REPLACE INTO `pet_levelstats` VALUES (17252, 80, 6872, 5266, 14033, 314, 130, 432, 266, 209);
+
+-- Succubus
+REPLACE INTO `pet_levelstats` VALUES (1863, 71, 2211, 2460, 4479, 155, 110, 284, 136, 124);
+REPLACE INTO `pet_levelstats` VALUES (1863, 72, 2259, 2516, 4666, 157, 111, 288, 139, 125);
+REPLACE INTO `pet_levelstats` VALUES (1863, 73, 2308, 2573, 4854, 159, 113, 293, 143, 127);
+REPLACE INTO `pet_levelstats` VALUES (1863, 74, 2358, 2631, 5042, 161, 115, 298, 147, 131);
+REPLACE INTO `pet_levelstats` VALUES (1863, 75, 2409, 2660, 5231, 164, 118, 303, 150, 134);
+REPLACE INTO `pet_levelstats` VALUES (1863, 76, 2461, 2735, 5421, 167, 120, 309, 154, 137);
+REPLACE INTO `pet_levelstats` VALUES (1863, 77, 2512, 2793, 5612, 170, 122, 314, 156, 141);
+REPLACE INTO `pet_levelstats` VALUES (1863, 78, 2562, 2852, 5804, 172, 124, 319, 158, 143);
+REPLACE INTO `pet_levelstats` VALUES (1863, 79, 2612, 2911, 5997, 175, 127, 324, 160, 147);
+REPLACE INTO `pet_levelstats` VALUES (1863, 80, 2665, 2989, 9706, 314, 130, 330, 163, 209);
+
+-- Felhunter
+REPLACE INTO `pet_levelstats` VALUES (417, 71, 3169, 2478, 4561, 156, 111, 285, 136, 124);
+REPLACE INTO `pet_levelstats` VALUES (417, 72, 3227, 2535, 4721, 159, 113, 290, 139, 126);
+REPLACE INTO `pet_levelstats` VALUES (417, 73, 3283, 2594, 4882, 162, 116, 294, 143, 128);
+REPLACE INTO `pet_levelstats` VALUES (417, 74, 3342, 2653, 5041, 165, 118, 298, 146, 129);
+REPLACE INTO `pet_levelstats` VALUES (417, 75, 3403, 2711, 5199, 167, 121, 304, 150, 131);
+REPLACE INTO `pet_levelstats` VALUES (417, 76, 3459, 2772, 5363, 170, 124, 309, 153, 132);
+REPLACE INTO `pet_levelstats` VALUES (417, 77, 3518, 2833, 5526, 172, 127, 313, 156, 135);
+REPLACE INTO `pet_levelstats` VALUES (417, 78, 3576, 2894, 5688, 175, 129, 319, 157, 137);
+REPLACE INTO `pet_levelstats` VALUES (417, 79, 3645, 2954, 5868, 177, 130, 324, 158, 140);
+REPLACE INTO `pet_levelstats` VALUES (417, 80, 3733, 3025, 7782, 314, 133, 329, 162, 209);

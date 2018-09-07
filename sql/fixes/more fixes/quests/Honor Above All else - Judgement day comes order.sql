@@ -1,0 +1,1 @@
+INSERT INTO `conditions` VALUES (19, 0, 13036, 0, 1, 8, 0, 13226, 0, 0, 0, 0, 0, '', 'Only be able to accept Honor Above all else if Judgement day comes is rewarded.');

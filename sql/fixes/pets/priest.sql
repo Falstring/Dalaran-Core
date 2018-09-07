@@ -1,0 +1,6 @@
+-- Shadowfiend
+REPLACE INTO `pet_levelstats` VALUES (19668, 66, 2310, 4060, 0, 155, 107, 76, 266, 172);
+REPLACE INTO `pet_levelstats` VALUES (19668, 67, 2330, 4160, 0, 161, 110, 77, 273, 176);
+REPLACE INTO `pet_levelstats` VALUES (19668, 68, 2350, 4260, 0, 165, 113, 78, 279, 180);
+REPLACE INTO `pet_levelstats` VALUES (19668, 69, 2380, 4360, 0, 169, 116, 79, 285, 184);
+REPLACE INTO `pet_levelstats` VALUES (19668, 70, 2410, 4460, 0, 173, 119, 80, 291, 188);
